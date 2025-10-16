@@ -258,3 +258,15 @@ export interface UserMenuProps {
   user: User;
   onLogout: () => void;
 }
+
+export interface LeadResponseIndefinie {
+  id: number;
+  Prenom: string | null;
+  Nom: string | null;
+  Mail: string | null;
+  Linkedin: string | null;
+  Entreprise: string | null;
+  Reponse: string | null;
+  Icebreaker: string | null;
+  created_at: string;
+}

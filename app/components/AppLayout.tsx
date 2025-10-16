@@ -27,7 +27,7 @@ interface AppLayoutProps {
 const viewLabels: Record<string, string> = {
   pipelinelabs: "PipelineLabs Manager",
   apercu: "Aperçu",
-  leads: "Leads",
+  leads: "Human in the Loop",
 };
 
 export function AppLayout({

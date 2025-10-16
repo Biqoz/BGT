@@ -25,11 +25,26 @@ export const useIcebreakerPolling = (pipelineId: string) => {
       .from("json_apify_pipelinelabs")
       .select("statut")
       .eq("id", pipelineId)
-      .single();
+      .maybeSingle();
 
-    if (error) return false;
+    // Ne pas arrêter sur erreur réseau/RLS: continuer le polling
+    if (error) {
+      console.warn(
+        "shouldPoll: erreur Supabase, on continue le polling:",
+        error
+      );
+      return true;
+    }
 
-    // Continuer le polling tant que le pipeline n'est pas terminé
+    // Si aucune ligne (latence ou lecture inconsistante), on continue
+    if (!data) {
+      console.warn(
+        `shouldPoll: pipeline ${pipelineId} non trouvé temporairement, on continue le polling`
+      );
+      return true;
+    }
+
+    // Arrêter uniquement quand le pipeline est marqué "Terminé"
     return data.statut !== "Terminé";
   }, [pipelineId]);
 
@@ -42,31 +57,48 @@ export const useIcebreakerPolling = (pipelineId: string) => {
 
     try {
       console.log(`🔍 Vérification pipeline ${pipelineId}...`);
-      
+
       // Vérifier le statut et l'étape actuels du pipeline
       const { data: pipelineData, error: pipelineError } = await supabase
         .from("json_apify_pipelinelabs")
         .select("statut, etape")
         .eq("id", pipelineId)
-        .single();
+        .maybeSingle();
 
       if (pipelineError) {
-        console.error("❌ Erreur lors de la récupération du pipeline:", pipelineError);
+        console.error(
+          "❌ Erreur lors de la récupération du pipeline:",
+          pipelineError
+        );
         return;
       }
 
-      console.log(`📊 Pipeline actuel - Statut: "${pipelineData.statut}", Étape: "${pipelineData.etape}"`);
+      if (!pipelineData) {
+        console.warn(
+          `Pipeline ${pipelineId} introuvable; abandon de la mise à jour.`
+        );
+        return;
+      }
+
+      console.log(
+        `📊 Pipeline actuel - Statut: "${pipelineData.statut}", Étape: "${pipelineData.etape}"`
+      );
 
       // Si l'étape est "Ice breakers Ready" mais le statut n'est pas "Terminé"
-      if (pipelineData.etape === "Ice breakers Ready" && pipelineData.statut !== "Terminé") {
+      if (
+        pipelineData.etape === "Ice breakers Ready" &&
+        pipelineData.statut !== "Terminé"
+      ) {
         console.log("🎯 Conditions remplies ! Mise à jour du statut...");
-        
+
         await PipelineService.updatePipelineStatusAndAction(pipelineId, {
           statut: "Terminé",
-          action: "Campagne terminée !"
+          action: "Campagne terminée !",
         });
-        
-        console.log("✅ Pipeline automatiquement marqué comme Terminé - Étape 'Ice breakers Ready' détectée");
+
+        console.log(
+          "✅ Pipeline automatiquement marqué comme Terminé - Étape 'Ice breakers Ready' détectée"
+        );
       } else {
         console.log("⏳ Conditions non remplies pour la mise à jour");
       }
@@ -135,7 +167,9 @@ export const useIcebreakerPolling = (pipelineId: string) => {
 
     pollingIntervalRef.current = setInterval(async () => {
       pollingCountRef.current += 1;
-      console.log(`🔄 Polling actif - Cycle ${pollingCountRef.current} pour pipeline ${pipelineId}`);
+      console.log(
+        `🔄 Polling actif - Cycle ${pollingCountRef.current} pour pipeline ${pipelineId}`
+      );
 
       try {
         await loadIcebreakerStats();
@@ -143,7 +177,7 @@ export const useIcebreakerPolling = (pipelineId: string) => {
         // Vérifier si on doit continuer le polling
         const stillNeedsPolling = await shouldPoll();
         console.log(`🔍 Polling nécessaire: ${stillNeedsPolling}`);
-        
+
         if (!stillNeedsPolling) {
           console.log("⏹️ Arrêt du polling - Pipeline terminé");
           stopPolling();

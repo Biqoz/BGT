@@ -39,8 +39,8 @@ const menuItems = [
   {
     icon: Users,
     view: "leads",
-    label: "Leads",
-    description: "Gestion des prospects",
+    label: "Human in the Loop",
+    description: "Réponses indéfinies à qualifier",
   },
 ];
 

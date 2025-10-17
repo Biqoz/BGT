@@ -23,6 +23,8 @@ export function useLeads(): UseLeadsReturn {
 
   // Sélectionner un lead
   const selectLead = useCallback((leadId: string | null) => {
+    // Fonctionnalité désactivée - leadId ignoré pour le moment
+    void leadId; // Utilisation explicite pour éviter l'erreur TypeScript strict
     setSelectedLead(null);
   }, []);
 

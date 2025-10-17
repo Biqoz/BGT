@@ -14,7 +14,10 @@ interface MultiStepPipelineFormProps {
 }
 
 // Fonction de validation déplacée à l'extérieur du composant
-const validateStep = (step: number, formData: MultiStepFormData): { isValid: boolean; errors: Record<string, string> } => {
+const validateStep = (
+  step: number,
+  formData: MultiStepFormData
+): { isValid: boolean; errors: Record<string, string> } => {
   const newErrors: Record<string, string> = {};
 
   switch (step) {
@@ -24,7 +27,10 @@ const validateStep = (step: number, formData: MultiStepFormData): { isValid: boo
       }
       break;
     case 3:
-      if (formData.campaign_type === "email" && !formData.instantly_campaign_id) {
+      if (
+        formData.campaign_type === "email" &&
+        !formData.instantly_campaign_id
+      ) {
         newErrors.instantly_campaign_id = "Veuillez sélectionner une campagne";
       }
       break;
@@ -34,11 +40,12 @@ const validateStep = (step: number, formData: MultiStepFormData): { isValid: boo
       } else {
         try {
           const parsedCriteria = JSON.parse(formData.criteresJson);
-          
+
           // Validation spécifique pour les campagnes email
           if (formData.campaign_type === "email") {
             if (!parsedCriteria.hasEmail || parsedCriteria.hasEmail !== true) {
-              newErrors.criteresJson = "⚠️ Pour une campagne email, le champ 'hasEmail' doit être défini à 'true' dans les critères JSON";
+              newErrors.criteresJson =
+                "⚠️ Pour une campagne email, le champ 'hasEmail' doit être défini à 'true' dans les critères JSON";
             }
           }
         } catch {
@@ -50,7 +57,7 @@ const validateStep = (step: number, formData: MultiStepFormData): { isValid: boo
 
   return {
     isValid: Object.keys(newErrors).length === 0,
-    errors: newErrors
+    errors: newErrors,
   };
 };
 
@@ -64,25 +71,25 @@ export const MultiStepPipelineForm: React.FC<MultiStepPipelineFormProps> = ({
     campaign_type: "email",
     instantly_campaign_id: "",
     criteresJson: "",
-    consigne: ""
+    consigne: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // Fonction mémorisée pour éviter les re-renders
   const updateFormData = useCallback((updates: Partial<MultiStepFormData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData((prev) => ({ ...prev, ...updates }));
   }, []);
 
   const handleNext = useCallback(() => {
     const validation = validateStep(currentStep, formData);
     setErrors(validation.errors);
-    
+
     if (validation.isValid) {
       // Skip step 3 for LinkedIn campaigns
       if (currentStep === 2 && formData.campaign_type === "linkedin") {
         setCurrentStep(4);
       } else {
-        setCurrentStep(prev => prev + 1);
+        setCurrentStep((prev) => prev + 1);
       }
     }
   }, [currentStep, formData]);
@@ -92,14 +99,14 @@ export const MultiStepPipelineForm: React.FC<MultiStepPipelineFormProps> = ({
     if (currentStep === 4 && formData.campaign_type === "linkedin") {
       setCurrentStep(2);
     } else {
-      setCurrentStep(prev => prev - 1);
+      setCurrentStep((prev) => prev - 1);
     }
   }, [currentStep, formData.campaign_type]);
 
   const handleSubmit = useCallback(async () => {
     const validation = validateStep(4, formData);
     setErrors(validation.errors);
-    
+
     if (validation.isValid) {
       try {
         const parsedCriteres = JSON.parse(formData.criteresJson);
@@ -108,7 +115,7 @@ export const MultiStepPipelineForm: React.FC<MultiStepPipelineFormProps> = ({
           criteres: parsedCriteres,
           consigne: formData.consigne || "",
           campaign_type: formData.campaign_type,
-          instantly_campaign_id: formData.instantly_campaign_id
+          instantly_campaign_id: formData.instantly_campaign_id,
         };
 
         await onSubmit(finalFormData);
@@ -119,7 +126,7 @@ export const MultiStepPipelineForm: React.FC<MultiStepPipelineFormProps> = ({
           campaign_type: "email",
           instantly_campaign_id: "",
           criteresJson: "",
-          consigne: ""
+          consigne: "",
         });
         setCurrentStep(1);
         setErrors({});
@@ -135,7 +142,7 @@ export const MultiStepPipelineForm: React.FC<MultiStepPipelineFormProps> = ({
     onNext: handleNext,
     onPrev: handlePrev,
     isLoading,
-    errors
+    errors,
   };
 
   const renderStep = () => {
@@ -156,9 +163,11 @@ export const MultiStepPipelineForm: React.FC<MultiStepPipelineFormProps> = ({
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <StepIndicator currentStep={currentStep} />
-      {renderStep()}
+    <div className="max-w-4xl mx-auto flex flex-col">
+      <div className="flex-shrink-0  p-1">
+        <StepIndicator currentStep={currentStep} />
+      </div>
+      <div className="flex-1 min-h-0">{renderStep()}</div>
     </div>
   );
 };

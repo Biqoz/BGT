@@ -58,9 +58,11 @@ export type PipelineEtape =
   | "Ice breakers Ready"
   | "Emails envoyés";
 
-export type PipelineAction = "Lancer la campagne ?" | "Campagne lancée !" | "Campagne terminée !";
+export type PipelineAction =
+  | "Lancer la campagne ?"
+  | "Campagne lancée !"
+  | "Campagne terminée !";
 
-// Table principale : json_apify_pipelinelabs
 // Table principale : json_apify_pipelinelabs
 export interface JsonApifyPipelinelabs extends BaseEntity {
   url: string; // Maintenant contient le JSON des critères

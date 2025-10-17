@@ -65,7 +65,7 @@ export function AppLayout({
           </Breadcrumb>
         </header>
         {/* Contenu qui prend l'espace restant (100vh - 64px) */}
-        <div className="flex-1 min-h-0 p-4 overflow-hidden">{children}</div>
+        <div className="flex-1 min-h-0 p-4 ">{children}</div>
       </SidebarInset>
     </SidebarProvider>
   );

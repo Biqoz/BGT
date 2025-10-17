@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Card,
   CardContent,
@@ -17,19 +17,97 @@ export const Step4Json: React.FC<StepProps> = ({
   errors,
   isLoading,
 }) => {
+  const [showLinkedInWarning, setShowLinkedInWarning] = useState(false);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Si c'est LinkedIn, afficher le warning avant de continuer
+    if (data.campaign_type === "linkedin") {
+      setShowLinkedInWarning(true);
+      return;
+    }
+    
     onNext();
   };
 
+  const handleLinkedInContinue = () => {
+    setShowLinkedInWarning(false);
+    onNext();
+  };
+
+  const handleLinkedInCancel = () => {
+    setShowLinkedInWarning(false);
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Critères de recherche</CardTitle>
-        <CardDescription>
-          Collez le JSON contenant vos critères de recherche.
-        </CardDescription>
-      </CardHeader>
+    <>
+      {/* Warning Modal pour LinkedIn */}
+      {showLinkedInWarning && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md mx-4 shadow-xl">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-6 w-6 text-red-600"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth="1.5"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                  />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-lg font-medium text-red-900">
+                  ⚠️ Attention - Limites LinkedIn
+                </h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p className="font-semibold">
+                    Rappel des limites La Growth Machine :
+                  </p>
+                  <ul className="mt-2 list-disc list-inside space-y-1">
+                    <li>Maximum <strong>80 demandes/jour</strong></li>
+                    <li>Maximum <strong>2400 demandes/mois</strong></li>
+                  </ul>
+                  <p className="mt-3 font-medium">
+                    Voulez-vous continuer avec ces critères ?
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end space-x-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleLinkedInCancel}
+                className="text-gray-700"
+              >
+                Modifier les critères
+              </Button>
+              <Button
+                type="button"
+                onClick={handleLinkedInContinue}
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Continuer quand même
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Critères de recherche</CardTitle>
+          <CardDescription>
+            Collez le JSON contenant vos critères de recherche.
+          </CardDescription>
+        </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Avertissement pour les campagnes email */}
@@ -61,6 +139,39 @@ export const Step4Json: React.FC<StepProps> = ({
                         &quot;hasEmail&quot;: true
                       </code>{" "}
                       dans vos critères JSON, sinon la campagne sera refusée.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Avertissement pour les campagnes LinkedIn */}
+          {data.campaign_type === "linkedin" && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg
+                    className="h-5 w-5 text-blue-400"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800">
+                    Limites LinkedIn - La Growth Machine
+                  </h3>
+                  <div className="mt-2 text-sm text-blue-700">
+                    <p>
+                      La Growth Machine conseille un maximum de{" "}
+                      <strong>80 demandes de connexion par jour</strong>, soit{" "}
+                      <strong>2400 connexions maximum par mois</strong>.
                     </p>
                   </div>
                 </div>
@@ -113,5 +224,6 @@ export const Step4Json: React.FC<StepProps> = ({
         </form>
       </CardContent>
     </Card>
+    </>
   );
 };

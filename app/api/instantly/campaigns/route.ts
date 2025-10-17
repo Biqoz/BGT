@@ -1,5 +1,17 @@
 import { NextResponse } from 'next/server';
 
+// Headers CORS
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+// Handler pour les requêtes OPTIONS (preflight)
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
+}
+
 // Type pour les données de campagne reçues de l'API Instantly.ai
 interface InstantlyApiCampaign {
   id: string;
@@ -64,7 +76,7 @@ export async function GET() {
 
     console.log('Campagnes transformées:', transformedCampaigns);
 
-    return NextResponse.json({ campaigns: transformedCampaigns });
+    return NextResponse.json({ campaigns: transformedCampaigns }, { headers: corsHeaders });
   } catch (error) {
     console.error('Erreur lors de la récupération des campagnes Instantly.ai:', error);
     return NextResponse.json(
@@ -72,7 +84,7 @@ export async function GET() {
         error: 'Erreur lors de la récupération des campagnes',
         details: error instanceof Error ? error.message : 'Erreur inconnue'
       },
-      { status: 500 }
+      { status: 500, headers: corsHeaders }
     );
   }
 }

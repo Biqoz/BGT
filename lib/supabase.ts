@@ -7,9 +7,10 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const url = supabaseUrl || "https://placeholder.supabase.co";
 const key = supabaseAnonKey || "placeholder-key";
 
-// Avertissement en développement si les vraies variables manquent
+// Avertissement si les vraies variables manquent
 if (typeof window !== "undefined" && (!supabaseUrl || !supabaseAnonKey)) {
-  console.warn("⚠️ Variables d'environnement Supabase manquantes");
+  console.error("🚨 ERREUR: Variables d'environnement Supabase manquantes en production!");
+  console.error("Ajoutez NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans votre plateforme de déploiement");
 }
 
 export const supabase = createClient(url, key);
